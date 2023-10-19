@@ -1,0 +1,11 @@
+#@data/values
+---
+name: "myapp"
+version: 1.14.2
+image: nginx
+provider: "deblaci"
+configMaps:
+- name: "game-config"
+  mountPath: "/etc/foo"
+- name: "config-multi-env-files"
+  mountPath: "/etc/bar"

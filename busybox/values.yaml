@@ -1,0 +1,6 @@
+#@data/values
+---
+name: "mybusybox"
+version: 1.36.1
+image: busybox
+provider: "deblaci"

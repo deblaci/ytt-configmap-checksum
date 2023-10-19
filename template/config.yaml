@@ -1,0 +1,39 @@
+#@ load("@ytt:data", "data")
+#@ load("functions.star", "f")
+apiVersion: v1
+kind: List
+items:
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      labels: #@ f.getLabels(data.values)
+      name: #@ data.values.name
+    spec:
+      selector:
+        app.kubernetes.io/name: #@ data.values.name
+      ports:
+        - protocol: TCP
+          port: 80
+          targetPort: 9376
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: #@ data.values.name
+    spec:
+      selector:
+        matchLabels:
+          app.kubernetes.io/name: #@ data.values.name
+      replicas: 2
+      template:
+        metadata:
+          labels: #@ f.getLabels(data.values)
+        annotations:
+          configMapChecksum: ""
+        spec:
+          containers:
+            - name: #@ data.values.name
+              image: #@ "{}:{}".format(data.values.image, data.values.version)
+              ports:
+                - containerPort: 80
+              volumeMounts: #@ f.getVolumeMounts(data.values)
+          volumes: #@ f.getVolumes(data.values)

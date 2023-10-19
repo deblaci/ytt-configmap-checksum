@@ -1,0 +1,11 @@
+#@data/values-schema
+---
+name: ""
+version: ""
+provider: ""
+image: ""
+color: ""
+#@schema/nullable
+configMaps:
+  - name: ""
+    mountPath: ""

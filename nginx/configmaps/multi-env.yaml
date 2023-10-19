@@ -1,0 +1,34 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+#@ load("functions.star", "f")
+#@ load("@ytt:yaml", "yaml")
+#@ load("@ytt:sha256", "sha256")
+#@overlay/match by=overlay.all
+---
+#@ def getConfigMapData():
+#@yaml/text-templated-strings
+allowed: '"true"'
+color: #@ data.values.color
+enemies: aliens
+how: fairlyNice
+lives: "3"
+textmode: "true"
+#@ end
+
+items:
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: config-multi-env-files
+    labels: #@ f.getLabels(data.values)
+  #@yaml/text-templated-strings
+  data: #@ getConfigMapData()
+  #@overlay/match by="kind"
+- kind: Deployment
+  spec:
+    template:
+      metadata:
+        #@overlay/match missing_ok=True
+        annotations:
+          #@overlay/match missing_ok=True
+          multi-env-checksum: #@ sha256.sum(yaml.encode(getConfigMapData()))

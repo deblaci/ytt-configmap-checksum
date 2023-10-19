@@ -1,0 +1,40 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+#@ load("functions.star", "f")
+#@ load("@ytt:yaml", "yaml")
+#@ load("@ytt:sha256", "sha256")
+#@overlay/match by=overlay.all
+---
+#@ def getConfigMapData():
+#@yaml/text-templated-strings
+game.properties: |-
+  enemies=aliens
+  lives=3
+  enemies.cheat=true
+  enemies.cheat.level=noGoodRotten
+  secret.code.passphrase=UUDDLRLRBABAS
+  secret.code.allowed=true
+  secret.code.lives=30    
+#@yaml/text-templated-strings
+ui.properties: |-
+  color.good=(@= data.values.color @)
+  color.bad=yellow
+  allow.textmode=true
+  how.nice.to.look=fairlyNice    
+#@ end
+items:
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: game-config
+    labels: #@ f.getLabels(data.values)
+  data: #@ getConfigMapData()
+  #@overlay/match by="kind"
+- kind: Deployment
+  spec:
+    template:
+      metadata:
+        #@overlay/match missing_ok=True
+        annotations:
+          #@overlay/match missing_ok=True
+          game-config-checksum: #@ sha256.sum(yaml.encode(getConfigMapData()))
